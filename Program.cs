@@ -1,5 +1,5 @@
 ﻿IDevice deviceModel = new DeviceModel();
-deviceModel.StartMenu();
+deviceModel.Use();
 
 //public interface IKitchenDevices
 //{
@@ -7,20 +7,24 @@ deviceModel.StartMenu();
 //}
 public interface IDevice
 {
-    void StartMenu();
+    void Use();
+    //public string Type { get; set; }
+    //public string Brand { get; set; }
+    //public bool IsFunctioning { get; set; }
 
 }
 
-public class Devicemodel
+sealed class Devicemodel
 {
     public string Type { get; set; }
     public string Brand { get; set; }
     public bool IsFunctioning { get; set; }
 
 }
-public class DeviceModel : IDevice
+sealed class DeviceModel : IDevice
 {
     Devicemodel newDevice = new Devicemodel();
+
     List<Devicemodel> deviceList = new List<Devicemodel>()
     {
         new Devicemodel(){ Type = "Våffeljärn", Brand="Electrolux", IsFunctioning = true},
@@ -38,24 +42,59 @@ public class DeviceModel : IDevice
         }
         Console.WriteLine(menuOptions);
     }
+
+    public int Input(string input)
+    {
+        int option = 0;
+
+        do
+        {
+            if (int.TryParse(input, out option) && option <= 5 && option >= 1) break;
+            Console.Write("Ange val: ");
+            input = Console.ReadLine();
+        }
+        while (!int.TryParse(input, out option) || option > 5 || option < 1);
+        return option;
+    }
+    //public void GetInput()
+    //{
+    //    Console.Write("Ange val: ");
+    //    if (Input(Console.ReadLine()) == 1)
+    //    {
+    //        UseDevice();
+    //    }
+    //    if (Input(Console.ReadLine()) == 2)
+    //    {
+    //        AddDevice();
+    //    }
+    //    if (Input(Console.ReadLine()) == 3)
+    //    {
+    //        ListDevices();
+    //    }
+    //    Use();
+    //}
+
+
+
+
     public void GetInput()
     {
         bool isNumber = true;
         do
         {
-            Console.Write("Ange ett tal: ");
+            Console.Write("Ange ett val: ");
             var input = Console.ReadLine();
             isNumber = int.TryParse(input, out int number);
             if (!isNumber)
             {
                 isNumber = true;
-                Console.Write("Ange ett tal: ");
+                Console.Write("Ange ett val: ");
                 input = Console.ReadLine();
                 continue;
             }
             if (number == 1)
             {
-                Console.WriteLine("success");
+                UseDevice();
                 break;
             }
             if (number == 2)
@@ -63,11 +102,65 @@ public class DeviceModel : IDevice
                 AddDevice();
                 break;
             }
-            if (number == 3) ListDevices(); break;
-          
-        } while (isNumber);
-        StartMenu();
+            if (number == 3) { ListDevices(); break; }
 
+            if (number == 4) RemoveDevice(); break;
+
+        } while (isNumber);
+        Use();
+    }
+
+    public void RemoveDevice()
+    {
+        ListDevices();
+        int count = 0;
+        Console.Write("Välj köksapparat: ");
+        var input = Console.ReadLine();
+        foreach (var device in deviceList)
+        {
+            count++;
+            if (int.Parse(input) == count)
+            {
+                Console.WriteLine($"Tog bort {device.Type}");
+                deviceList.Remove(device);
+                return;
+            }
+        }
+    }
+    public bool DeviceFunction()
+    {
+        bool isDeviceFunctioning = true;
+
+        foreach (var device in deviceList)
+        {
+            isDeviceFunctioning = device.IsFunctioning;
+            if (isDeviceFunctioning == true)
+            {
+                Console.WriteLine($"Använder {device.Type}");
+            }
+            else
+            {
+                Console.WriteLine("Trasig");
+                return false;
+            }
+        }
+        return isDeviceFunctioning;
+    }
+    public void UseDevice()
+    {
+        ListDevices();
+        int count = 0;
+        Console.Write("Välj köksapparat: ");
+        var input = Console.ReadLine();
+        foreach (var device in deviceList)
+        {
+            count++;
+            if (int.Parse(input) == count)
+            {
+                if (device.IsFunctioning == true) Console.WriteLine($"Använder {device.Type}");
+                else Console.WriteLine("Trasig"); return;
+            }
+        }
     }
     public void AddDevice()
     {
@@ -95,7 +188,7 @@ public class DeviceModel : IDevice
     }
     public void ListDevices()
     {
-
+        int count = 0;
         foreach (var device in deviceList)
         {
             string PrintFunctionStatus()
@@ -107,138 +200,17 @@ public class DeviceModel : IDevice
 
                 return functionStatus;
             }
-
-            Console.WriteLine("Typ: " + device.Type);
+            count++;
+            Console.WriteLine($"\n{count}: Typ: {device.Type}");
             Console.WriteLine("Märke: " + device.Brand);
-            Console.WriteLine("Funktionsstatus: " + PrintFunctionStatus());
+            Console.WriteLine("Funktionsstatus: " + PrintFunctionStatus() + "\n----------------");
         }
 
     }
-    public void Use()
-    {
 
-    }
-    public void StartMenu()
+    public void Use()
     {
         DisplayMenuOptions();
         GetInput();
     }
 }
-
-//    public string GetUserInput()
-//    {
-//        string userInput = Console.ReadLine();
-//        bool isNumber = true;
-//        do
-//        {
-//            Console.Write("Ange tal: ");
-//            userInput = Console.ReadLine();
-//            //input form user
-
-//            //check if input is number
-//            isNumber = int.TryParse(userInput, out int number);
-
-//            //if it's letter just skip
-//            if (!isNumber)
-//            {
-//                isNumber = true;
-//                Console.WriteLine("Oglitigt");
-//                Console.Write("Ange tal: ");
-//                userInput = Console.ReadLine();
-//                continue;
-//            }
-//            // if input is greater than 5 continue
-//            if (number > 5)
-//            {
-//                isNumber = true;
-//                Console.WriteLine("Oglitigt");
-//                Console.Write("Ange tal: ");
-//                userInput = Console.ReadLine();
-//                continue;
-//            }
-
-//            break;
-//        }
-//        while (isNumber);
-//        return userInput;
-//    }
-//    public void HandelUserInput()
-//    {
-
-//        if (GetUserInput() == "1")
-//        {
-//            Console.WriteLine("1 choosed");
-//        }
-//        if (GetUserInput() == "2")
-//        {
-//            kitchenMethods.AddKitchenDevice();
-//            StartMenu();
-//        }
-//        if (GetUserInput() == "3")
-//        {
-//            kitchenMethods.ListDevices();
-//            StartMenu();
-//        }
-//    }
-//    public void StartMenu()
-//    {
-//        DisplayMenuOptions();
-//        HandelUserInput();
-//    }
-//}
-//class KitchenMethods : KitchenMenu
-//{
-
-//    List<KitchenDevices> kitchenDeviceList = new List<KitchenDevices>();
-//    KitchenDevices kitchenDevice = new KitchenDevices();
-
-
-//    public void AddKitchenDevice()
-//    {
-//        List<KitchenDevices> kitchenDeviceList = new List<KitchenDevices>();
-//        KitchenDevices kitchenDevice = new KitchenDevices();
-
-
-//        Console.Write("Ange typ: ");
-//        kitchenDevice.Type = new(Console.ReadLine());
-
-//        if (kitchenDevice.Type == null) return;
-
-//        Console.Write("Ange märke/namn: ");
-//        kitchenDevice.Brand = new(Console.ReadLine());
-
-//        if (kitchenDevice.Brand == null) return;
-
-//        Console.Write("Ange om den fungerar (j/n): ");
-//        if (Console.ReadLine() == "j")
-//        {
-//            kitchenDeviceList.Add(kitchenDevice);
-//            kitchenDevice = new KitchenDevices();
-//            Console.WriteLine(kitchenDeviceList.Count);
-
-//            Console.WriteLine("Tillagd!");
-//        }
-//        else if (Console.ReadLine() == "n")
-//        {
-//            kitchenDevice.IsFunctioning = false;
-//            Console.WriteLine("köksapparaten är trasig");
-//        }
-
-//    }
-
-//    public void ListDevices()
-//    {
-//        foreach (KitchenDevices item in kitchenDeviceList)
-//        {
-//            Console.WriteLine(item.Type);
-//            Console.WriteLine(item.Brand);
-//            Console.WriteLine(item.IsFunctioning);
-//        }
-//    }
-
-
-
-
-//}
-
-
