@@ -40,9 +40,11 @@ class DeviceModel : IDevice
 
 
     public List<DeviceModel> deviceList = new List<DeviceModel>();
-    static private List<DeviceModel> AddItemsToList()
+    public DeviceModel? NewDevice { get; set; }
+
+    static private List<DeviceModel> DefaultDeviceList()
     {
-        List<DeviceModel> ss = new List<DeviceModel>()
+        List<DeviceModel> defaultDeviceList = new List<DeviceModel>()
         {
             new DeviceModel() { _type = "Vattenkokare",
             _brand = "Siemens",
@@ -55,46 +57,27 @@ class DeviceModel : IDevice
             _isFunctioning = false,
             },
              new DeviceModel() {
-
                 _type = "Kaffebryggare",
             _brand = "Samsung",
             _isFunctioning = true,
             },
         };
-        var ff = ss.FindAll(x => x._isFunctioning == true);
-        Console.WriteLine(ff.Count);
-        return ss;
+        //var ff = defaultDeviceList.FindAll(x => x._isFunctioning == true);
+        //Console.WriteLine(ff.Count);
+        return defaultDeviceList;
     }
 
-
-    public void InsertDevices()
+    public void InsertDefaultDeviceList()
     {
-        if (deviceList.Count == 0) { deviceList.AddRange(AddItemsToList()); }
+        if (deviceList.Count == 0) { deviceList.AddRange(DefaultDeviceList()); }
         return;
     }
-    public DeviceModel? NewDevice { get; set; }
-
-
-    //private DeviceModel MapIntegration(DeviceModel deviceItem)
-    //{
-    //    var ret = new List<DeviceModel>();
-    //    ret.Add(deviceItem);
-    //    return new DeviceModel()
-    //    {
-    //        _type = "Type 1 XXX",
-    //        _brand = "brand 1 XXX",
-    //        _isFunctioning = true,
-    //    };
-    //}
-
-
     public void ListDevices()
     {
-
         int count = 0;
         foreach (var device in deviceList)
         {
-            string PrintFunctionStatus()
+            string PrintDeviceFunctionStatus()
             {
                 string functionStatus = "";
                 if (device._isFunctioning == true) functionStatus = "Fungerar";
@@ -106,22 +89,25 @@ class DeviceModel : IDevice
             count++;
             Console.WriteLine($"\n{count}: Typ: {device._type}");
             Console.WriteLine("Märke: " + device._brand);
-            Console.WriteLine("Funktionsstatus: " + PrintFunctionStatus() + "\n----------------");
+            Console.WriteLine("Funktionsstatus: " + PrintDeviceFunctionStatus() + "\n----------------");
         }
         Console.WriteLine("Totalt: " + count);
     }
 
 
-    public string[] menuOptionsArr = { "1. Använd köksapparat", "2. Lägg till köksapparat", "3. Lista köksapparater", "4. Ta bort köksapparat", "5. Avsluta" };
+    public string[] navOptionsArr = { "1. Använd köksapparat", "2. Lägg till köksapparat", "3. Lista köksapparater", "4. Ta bort köksapparat", "5. Avsluta" };
     public void DisplayMenuOptions()
     {
-        string menuOptions = "";
-        foreach (string option in menuOptionsArr)
+        string navOptions = "";
+        foreach (string option in navOptionsArr)
         {
-            menuOptions += $"\n{option}";
+            navOptions += $"\n{option}";
         }
-        Console.WriteLine(menuOptions);
+        Console.WriteLine(navOptions);
     }
+
+
+
     public void GetInput()
     {
         bool isNumber = true;
@@ -137,44 +123,14 @@ class DeviceModel : IDevice
                 input = Console.ReadLine();
                 continue;
             }
-            if (number == 1)
-            {
-                UseDevice();
-                break;
-            }
-            if (number == 2)
-            {
-                AddDevice();
-                break;
-            }
+            if (number == 1) { UseDevice(); break; }
+            if (number == 2) { AddDevice(); break; }
             if (number == 3) { ListDevices(); break; }
-
             if (number == 4) { RemoveDevice(); break; }
 
         } while (isNumber);
         Use();
     }
-
-    public bool DeviceFunction()
-    {
-        bool isDeviceFunctioning = true;
-
-        foreach (var device in deviceList)
-        {
-            isDeviceFunctioning = device._isFunctioning;
-            if (isDeviceFunctioning == true)
-            {
-                Console.WriteLine($"Använder {device._type}");
-            }
-            else
-            {
-                Console.WriteLine("Trasig");
-                return false;
-            }
-        }
-        return isDeviceFunctioning;
-    }
-
     //-------ADD DEVICE-------
     public void AddDevice()
     {
@@ -193,7 +149,7 @@ class DeviceModel : IDevice
             deviceList.Add(NewDevice);
             NewDevice = new DeviceModel();
             Console.WriteLine(deviceList.Count);
-            Console.WriteLine("Tillagd");
+            Console.WriteLine("Tillagd!\n");
         }
         else if (Console.ReadLine() == "n")
         {
@@ -201,60 +157,64 @@ class DeviceModel : IDevice
             deviceList.Add(NewDevice);
             NewDevice = new DeviceModel();
             Console.WriteLine("köksapparaten är trasig");
-            Console.WriteLine("Tillagd");
+            Console.WriteLine("Tillagd!\n");
         }
     }
-
-
-
 
     public void UseDevice()
     {
-        int count = 0;
+        ListDevices();
+
         Console.Write("Välj köksapparat: ");
+        var getSelectedDevice = deviceList.ElementAt(GetSelectedDevice());
+        try
+        {
+            if (getSelectedDevice._isFunctioning == false)
+            {
+                Console.WriteLine("Köksapparaten är trasig"); return;
+            }
+            Console.WriteLine($"Använder {getSelectedDevice._type}");
+        }
+        catch (Exception ex) { Console.WriteLine(ex); }
+    }
+
+    public int GetSelectedDevice()
+    {
+        int number = 0;
+        bool isNumber = true;
         var input = Console.ReadLine();
         foreach (var device in deviceList)
         {
-            count++;
-            int.TryParse(input, out int number);
-            if (number == count)
+            isNumber = int.TryParse(input, out number);
+            if (!isNumber)
             {
-                if (device._isFunctioning == true) Console.WriteLine($"Använder {device._type}");
-                else Console.WriteLine("Trasig"); return;
+                isNumber = true;
+                Console.WriteLine("Felaktig inmatning\n");
+                Use();
             }
         }
+        return number;
     }
-    public int GetSelectedDevice()
+    public List<DeviceModel> ItemList()
     {
-        Console.Write("Välj köksapparat: ");
-        int count = 0;
-        foreach (var device in deviceList)
-        {
-            count++;
-        }
-        return count;
+        return deviceList;
     }
-
     public void RemoveDevice()
     {
         ListDevices();
-        int count = 0;
-        Console.Write("Ta bort köksapparat: ");
-        var input = Console.ReadLine();
-        foreach (DeviceModel device in deviceList.ToList())
-        {
-            count++;
-            if (int.Parse(input) == count)
-            {
-                Console.WriteLine($"Tog bort {device._type}");
-                deviceList.Remove(device);
-            }
-        }
+        Console.Write("\nTa bort köksapparat: ");
+
+        var selectedDevice = deviceList.ElementAt(GetSelectedDevice() - 1);
+        if (selectedDevice._isFunctioning == false) { Console.WriteLine("Köksapparaten är trasig"); return; }
+        deviceList.Remove(selectedDevice);
+
+        //if (!deviceList.Contains(selectedDevice)){}
+        Console.WriteLine($"\nTog bort {selectedDevice._type}");
     }
 
     public void Use()
     {
-        InsertDevices();
+        InsertDefaultDeviceList();
         DisplayMenuOptions();
         GetInput();
     }
